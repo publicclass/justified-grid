@@ -49,7 +49,7 @@ function justify(elements, options) {
 
       // if it's not within the threshold try with one less entry
       var diffHeight = Math.abs(options.rowHeight - contentHeight);
-      if (diffHeight >= options.rowHeight*options.heightThreshold) {
+      while (row.entries.length > 1 && diffHeight >= options.rowHeight*options.heightThreshold) {
         console.log(' - over threshold. pop and resize %s > %s.', diffHeight, options.rowHeight*options.heightThreshold);
         var removedEntry = row.entries.pop();
         contentWidth = row.width();
@@ -63,7 +63,14 @@ function justify(elements, options) {
       }
 
       if (diffHeight > options.rowHeight*options.heightThreshold) {
-        console.log(' - STILL over threshold. pop and resize %s > %s.', diffHeight, options.heightThreshold);
+        console.log(' - STILL over threshold. pop and resize %s > %s.', diffHeight, options.rowHeight*options.heightThreshold);
+        console.log('   entries left in row: %s', row.entries.length);
+        if (row.entries.length === 1) {
+          // TODO only one entry left and it's aspect ratio won't let it
+          // justify within the threshold. how to deal with these?
+          console.log('  ONLY one entry left. it won\'t fit so we\'ll ignore threshold');
+          row.height = entry.height();
+        }
       }
 
       // done, reset and start a new row
@@ -125,7 +132,7 @@ function makeRow(rows, initialEntries, initialHeight) {
     }
   };
   rows.push(row);
-  // console.log('makeRow()');
+  console.log('makeRow()');
   return row;
 }
 
