@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Justified Grid</title>
+  <style>
+  html, body {
+    margin: 0;
+    padding: 0;
+  }
+  #gallery {
+    top: 100px;
+    position: relative;
+  }
+  #gallery.working img {
+    display: none;
+  }
+  #gallery img {
+    box-sizing: border-box;
+    padding: 0px;
+  }
+  form {
+    position: fixed;
+    z-index: 1;
+    background: white;
+    padding: 10px;
+    width: 100%;
+    height: 100px;
+  }
+  label {
+    box-sizing: border-box;
+    display: inline-block;
+    width: 49%;
+  }
+  label > * {
+    width: 100%;
+    display: block;
+  }
+  </style>
+</head>
+<body>
+  <form>
+    <label>
+      <span>Width (<span id='w'></span>px)</span>
+      <input name='width' value='310' min='100' max='2000' step='10' type='range' onchange='redraw()'>
+    </label>
+    <label>
+      <span>Height (<span id='h'></span>px)</span>
+      <input name='height' value='150' min='10' max='400' step='1' type='range' onchange='redraw()'>
+    </label>
+    <label title='How much of the last row can be whitespace before it is justified. 100% means always justify the last row. 0% means never justify the last row.'>
+      <span>Orphan Threshold (<span id='o'></span>%)</span>
+      <input name='hthreshold' value='0.1' min='0' max='1' step='0.01' type='range' onchange='redraw()'>
+    </label>
+    <label title='How flexible each row height is in % of the target row height.'>
+      <span>Height Threshold (<span id='t'></span>%)</span>
+      <input name='vthreshold' value='0.25' min='0' max='1' step='0.01' type='range' onchange='redraw()'>
+    </label>
+  </form>
+
+  <div id='gallery' class='working'>
+    <img src='http://placehold.it/600x500' width='600' height='500'>
+    <img src='http://placehold.it/600x600' width='600' height='600'>
+    <img src='http://placehold.it/600x800' width='600' height='800'>
+    <img src='http://placehold.it/600x400' width='600' height='400'>
+    <img src='http://placehold.it/600x430' width='600' height='430'>
+    <img src='http://placehold.it/600x200' width='600' height='200'>
+    <img src='http://placehold.it/600x800' width='600' height='800'>
+    <img src='http://placehold.it/600x400' width='600' height='400'>
+    <img src='http://placehold.it/600x430' width='600' height='430'>
+    <img src='http://placehold.it/600x200' width='600' height='200'>
+    <img src='http://placehold.it/600x500' width='600' height='500'>
+    <img src='http://placehold.it/600x600' width='600' height='600'>
+    <img src='http://placehold.it/600x200' width='600' height='200'>
+    <img src='http://placehold.it/600x800' width='600' height='800'>
+    <img src='http://placehold.it/600x400' width='600' height='400'>
+    <img src='http://placehold.it/600x430' width='600' height='430'>
+    <img src='http://placehold.it/600x200' width='600' height='200'>
+    <img src='http://placehold.it/600x500' width='600' height='500'>
+    <img src='http://placehold.it/600x600' width='600' height='600'>
+    <img src='http://placehold.it/600x800' width='600' height='800'>
+    <img src='http://placehold.it/600x400' width='600' height='400'>
+    <img src='http://placehold.it/600x430' width='600' height='430'>
+    <img src='http://placehold.it/600x200' width='600' height='200'>
+    <img src='http://placehold.it/600x800' width='600' height='800'>
+    <img src='http://placehold.it/600x400' width='600' height='400'>
+    <img src='http://placehold.it/600x430' width='600' height='430'>
+    <img src='http://placehold.it/600x200' width='600' height='200'>
+    <img src='http://placehold.it/600x500' width='600' height='500'>
+    <img src='http://placehold.it/600x600' width='600' height='600'>
+    <img src='http://placehold.it/600x430' width='600' height='430'>
+    <img src='http://placehold.it/600x200' width='600' height='200'>
+    <img src='http://placehold.it/600x600' width='600' height='600'>
+    <img src='http://placehold.it/600x800' width='600' height='800'>
+    <img src='http://placehold.it/600x400' width='600' height='400'>
+    <img src='http://placehold.it/600x430' width='600' height='430'>
+    <img src='http://placehold.it/600x500' width='600' height='500'>
+    <img src='http://placehold.it/600x600' width='600' height='600'>
+    <img src='http://placehold.it/600x800' width='600' height='800'>
+    <img src='http://placehold.it/600x400' width='600' height='400'>
+    <img src='http://placehold.it/600x430' width='600' height='430'>
+  </div>
+
+  <script src='./justified-grid-latest.min.js'></script>
+  <script>
+    var form = document.forms[0];
+    var gallery = document.querySelector('#gallery');
+    redraw();
+
+    // a dumb trick avoid the flash of unpositioned elements
+    // before the initial positioning
+    gallery.classList.remove('working');
+
+    function redraw() {
+      updateForm();
+      justifyGrid(gallery.children, {
+        rowHeight: form.height.valueAsNumber,
+        rowWidth: Math.min(form.width.valueAsNumber, gallery.clientWidth),
+        orphanThreshold: form.hthreshold.valueAsNumber,
+        heightThreshold: form.vthreshold.valueAsNumber
+      });
+    }
+    function updateForm() {
+      w.innerText = Math.min(form.width.valueAsNumber, gallery.clientWidth);
+      h.innerText = form.height.valueAsNumber;
+      o.innerText = form.hthreshold.valueAsNumber * 100 | 0;
+      t.innerText = form.vthreshold.valueAsNumber * 100 | 0;
+    }
+
+    window.addEventListener('resize', redraw);
+  </script>
+</body>
+</html>

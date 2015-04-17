@@ -1,0 +1,29 @@
+{
+  "name": "justified-grid",
+  "version": "1.0.0",
+  "description": "Justify elements to fit a certain width. Just like Flickr and Google does.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/publicclass/justified-grid.git"
+  },
+  "keywords": [
+    "grid",
+    "justified",
+    "horizontal",
+    "packing"
+  ],
+  "author": "Robert Sköld <robert@publicclass.se>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/publicclass/justified-grid/issues"
+  },
+  "homepage": "https://github.com/publicclass/justified-grid",
+  "devDependencies": {
+    "browserify": "^9.0.8",
+    "uglifyify": "^3.0.1"
+  }
+}
