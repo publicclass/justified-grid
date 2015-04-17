@@ -4,8 +4,8 @@ module.exports = justify;
 function justify(elements, options) {
   // build the options
   options = options || {};
-  options.rowWidth = Math.max(1, options.rowWidth || 800);
-  options.rowHeight = Math.max(1, options.rowHeight || 100);
+  options.rowWidth = Math.round(Math.max(1, options.rowWidth || 800));
+  options.rowHeight = Math.round(Math.max(1, options.rowHeight || 100));
   options.heightThreshold = Math.min(1, Math.max(0, options.heightThreshold || 0.10)); // 10%
   options.orphanThreshold = Math.min(1, Math.max(0, options.orphanThreshold || 0.25)); // 25%
 
