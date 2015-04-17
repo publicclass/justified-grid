@@ -107,10 +107,10 @@ function justify(elements, options) {
   var y = 0;
   rows.forEach(function renderRow(row) {
     row.entries.forEach(function renderEntry(entry) {
-      console.log(' - entry at %s,%s %sx%s', x|0, y|0, entry.width()|0, entry.height()|0);
+      console.log(' - entry at %s,%s %sx%s', x|0, y|0, entry.width(), entry.height()|0);
       entry.element.style.left = Math.floor(x) + 'px';
       entry.element.style.top = Math.floor(y) + 'px';
-      entry.element.style.width = Math.ceil(entry.width()) + 'px';
+      entry.element.style.width = Math.min(options.rowWidth, Math.ceil(entry.width())) + 'px';
       entry.element.style.height = Math.ceil(entry.height()) + 'px';
       entry.element.style.position = 'absolute';
       x += entry.width();
