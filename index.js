@@ -6,7 +6,7 @@ function justify(elements, options) {
   options = options || {};
   options.rowWidth = Math.round(Math.max(1, options.rowWidth || 800));
   options.rowHeight = Math.round(Math.max(1, options.rowHeight || 100));
-  options.heightThreshold = Math.min(1, Math.max(0, options.heightThreshold || 0.10)); // 10%
+  options.heightThreshold = Math.min(1, Math.max(0, options.heightThreshold || 0.25)); // 25%
   options.orphanThreshold = Math.min(1, Math.max(0, options.orphanThreshold || 0.25)); // 25%
 
   // build some easier to use entry objects
@@ -48,28 +48,31 @@ function justify(elements, options) {
       console.log(' - row: %sx%s', contentWidth, contentHeight);
 
       // if it's not within the threshold try with one less entry
-      var diffHeight = Math.abs(options.rowHeight - contentHeight);
-      while (row.entries.length > 1 && diffHeight >= options.rowHeight*options.heightThreshold) {
-        console.log(' - over threshold. pop and resize %s > %s.', diffHeight, options.rowHeight*options.heightThreshold);
+      while (row.entries.length > 1 && Math.abs(options.rowHeight - contentHeight) >= options.rowHeight*options.heightThreshold) {
+        console.log(' - over threshold. pop and resize.');
+        var preDiff = Math.abs(options.rowHeight - contentHeight);
         var removedEntry = row.entries.pop();
         contentWidth = row.width();
         contentHeight = options.rowHeight / contentWidth * options.rowWidth;
         row.height = contentHeight;
         contentWidth = row.width();
+        var postDiff = Math.abs(options.rowHeight - contentHeight);
         console.log(' - justified height: %s / %s * %s = %s', options.rowHeight, contentWidth, options.rowWidth, contentHeight)
-        console.log(' - updated row: %sx%s', contentWidth, contentHeight);
+        console.log(' - updated row: %sx%s (%s vs %s)', contentWidth, contentHeight, preDiff, postDiff);
+
+        // TODO check if we we're better off with that last entry anyway
+
         removedEntries.push(removedEntry);
-        diffHeight = Math.abs(options.rowHeight - contentHeight);
       }
 
-      if (diffHeight > options.rowHeight*options.heightThreshold) {
-        console.log(' - STILL over threshold. pop and resize %s > %s.', diffHeight, options.rowHeight*options.heightThreshold);
-        console.log('   entries left in row: %s', row.entries.length);
+      if (Math.abs(options.rowHeight - contentHeight) > options.rowHeight*options.heightThreshold) {
+        console.log(' - STILL over threshold. entries left in row: %s', row.entries.length);
         if (row.entries.length === 1) {
           // TODO only one entry left and it's aspect ratio won't let it
           // justify within the threshold. how to deal with these?
           console.log('  ONLY one entry left. it won\'t fit so we\'ll ignore threshold');
-          row.height = entry.height();
+          var lastEntry = row.entries[0];
+          contentHeight = 1/lastEntry.aspectRatio * options.rowWidth;
         }
       }
 
