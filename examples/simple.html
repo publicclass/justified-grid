@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset='utf8'>
   <title>Justified Grid</title>
   <style>
   html, body {
@@ -41,7 +42,7 @@
   <form>
     <label>
       <span>Width (<span id='w'></span>px)</span>
-      <input name='width' value='310' min='100' max='2000' step='10' type='range' onchange='redraw()'>
+      <input name='width' value='550' min='100' max='2000' step='10' type='range' onchange='redraw()'>
     </label>
     <label>
       <span>Height (<span id='h'></span>px)</span>
@@ -49,7 +50,7 @@
     </label>
     <label title='How much of the last row can be whitespace before it is justified. 100% means always justify the last row. 0% means never justify the last row.'>
       <span>Orphan Threshold (<span id='o'></span>%)</span>
-      <input name='hthreshold' value='0.1' min='0' max='1' step='0.01' type='range' onchange='redraw()'>
+      <input name='hthreshold' value='0.25' min='0' max='1' step='0.01' type='range' onchange='redraw()'>
     </label>
     <label title='How flexible each row height is in % of the target row height.'>
       <span>Height Threshold (<span id='t'></span>%)</span>
@@ -112,18 +113,20 @@
 
     function redraw() {
       updateForm();
+      console.time('justify');
       justifyGrid(gallery.children, {
         rowHeight: form.height.valueAsNumber,
         rowWidth: Math.min(form.width.valueAsNumber, gallery.clientWidth),
         orphanThreshold: form.hthreshold.valueAsNumber,
         heightThreshold: form.vthreshold.valueAsNumber
       });
+      console.timeEnd('justify');
     }
     function updateForm() {
-      w.innerText = Math.min(form.width.valueAsNumber, gallery.clientWidth);
-      h.innerText = form.height.valueAsNumber;
-      o.innerText = form.hthreshold.valueAsNumber * 100 | 0;
-      t.innerText = form.vthreshold.valueAsNumber * 100 | 0;
+      w.innerHTML = Math.min(form.width.valueAsNumber, gallery.clientWidth);
+      h.innerHTML = form.height.valueAsNumber;
+      o.innerHTML = form.hthreshold.valueAsNumber * 100 | 0;
+      t.innerHTML = form.vthreshold.valueAsNumber * 100 | 0;
     }
 
     window.addEventListener('resize', redraw);
