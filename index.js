@@ -4,10 +4,12 @@ module.exports = justify;
 function justify(elements, options) {
   // build the options
   options = options || {};
+  options.debug = !!options.debug;
   options.rowWidth = Math.round(Math.max(1, options.rowWidth || 800));
   options.rowHeight = Math.round(Math.max(1, options.rowHeight || 100));
   options.heightThreshold = Math.min(1, Math.max(0, options.heightThreshold || 0.25)); // 25%
   options.orphanThreshold = Math.min(1, Math.max(0, options.orphanThreshold || 0.25)); // 25%
+  options.render = typeof options.render == 'function' ? options.render : false;
 
   // build some easier to use entry objects
   var entries = [];
@@ -17,17 +19,21 @@ function justify(elements, options) {
       element: elements[i],
       aspectRatio: aspectRatio(elements[i]),
       height: function() {
+        log('entry.height(%s || %s)', this.row && this.row.height, options.rowHeight);
         return this.row && this.row.height || options.rowHeight;
       },
       width: function() {
-        // console.log('entry.width(h: %s, r: %s)', this.height(), this.aspectRatio);
+        log('entry.width(h: %s, r: %s)', this.height(), this.aspectRatio);
         return this.height() * this.aspectRatio;
       }
     });
   }
 
+  var log = options.debug ? console.log.bind(console) : function(){};
+
   // build rows
-  console.log('build rows')
+  log('build rows');
+
   var rows = [];
   var row = makeRow(rows, null, options.rowHeight);
   var contentWidth = 0;
@@ -36,20 +42,22 @@ function justify(elements, options) {
     contentWidth += entry.width();
     entry.row = row;
     row.entries.push(entry);
-    console.log(' - %s,%s %sx%s', rows.length, row.entries.length, entry.width(), entry.height());
+
+    log(' - %s,%s %sx%s', rows.length, row.entries.length, entry.width(), entry.height());
 
     // when overflowing make sure the row fits
     if (contentWidth >= options.rowWidth) {
       var removedEntries = [];
-      console.log(' - overflowing: %s / %s', contentWidth, options.rowWidth);
+
+      log(' - overflowing: %s / %s', contentWidth, options.rowWidth);
 
       contentHeight = options.rowHeight / contentWidth * options.rowWidth;
       contentWidth = options.rowWidth;
-      console.log(' - row: %sx%s', contentWidth, contentHeight);
+      log(' - row: %sx%s', contentWidth, contentHeight);
 
       // if it's not within the threshold try with one less entry
       while (row.entries.length > 1 && Math.abs(options.rowHeight - contentHeight) >= options.rowHeight*options.heightThreshold) {
-        console.log(' - over threshold. pop and resize.');
+        log(' - over threshold. pop and resize.');
         var preDiff = Math.abs(options.rowHeight - contentHeight);
         var removedEntry = row.entries.pop();
         contentWidth = row.width();
@@ -57,8 +65,8 @@ function justify(elements, options) {
         row.height = contentHeight;
         contentWidth = row.width();
         var postDiff = Math.abs(options.rowHeight - contentHeight);
-        console.log(' - justified height: %s / %s * %s = %s', options.rowHeight, contentWidth, options.rowWidth, contentHeight)
-        console.log(' - updated row: %sx%s (%s vs %s)', contentWidth, contentHeight, preDiff, postDiff);
+        log(' - justified height: %s / %s * %s = %s', options.rowHeight, contentWidth, options.rowWidth, contentHeight)
+        log(' - updated row: %sx%s (%s vs %s)', contentWidth, contentHeight, preDiff, postDiff);
 
         // TODO check if we we're better off with that last entry anyway
 
@@ -66,11 +74,11 @@ function justify(elements, options) {
       }
 
       if (Math.abs(options.rowHeight - contentHeight) > options.rowHeight*options.heightThreshold) {
-        console.log(' - STILL over threshold. entries left in row: %s', row.entries.length);
+        log(' - STILL over threshold. entries left in row: %s', row.entries.length);
         if (row.entries.length === 1) {
           // TODO only one entry left and it's aspect ratio won't let it
           // justify within the threshold. how to deal with these?
-          console.log('  ONLY one entry left. it won\'t fit so we\'ll ignore threshold');
+          log('  ONLY one entry left. it won\'t fit so we\'ll ignore threshold');
           var lastEntry = row.entries[0];
           contentHeight = 1/lastEntry.aspectRatio * options.rowWidth;
         }
@@ -95,33 +103,50 @@ function justify(elements, options) {
 
     // justify the last row if it's width is within a threshold
     var diffWidth = Math.abs(options.rowWidth - contentWidth);
-    console.log('last row. should we justify?', diffWidth, options.rowWidth*options.orphanThreshold);
+    log('last row. should we justify?', diffWidth, options.rowWidth*options.orphanThreshold);
     if (diffWidth <= options.rowWidth*options.orphanThreshold) {
-      console.log('justify last row. %s > %s', diffWidth, options.rowWidth*options.orphanThreshold, contentWidth);
+      log('justify last row. %s > %s', diffWidth, options.rowWidth*options.orphanThreshold, contentWidth);
       contentHeight = options.rowHeight / row.width() * options.rowWidth;
       row.height = contentHeight;
-      console.log(' - updated row: %sx%s', row.width(), contentHeight);
+      log(' - updated row: %sx%s', row.width(), contentHeight);
     }
   }
 
   // update the elements
-  console.log('render elements:')
+  log('render elements:')
   var x = 0;
   var y = 0;
+  var elements = [];
   rows.forEach(function renderRow(row) {
     row.entries.forEach(function renderEntry(entry) {
-      console.log(' - entry at %s,%s %sx%s', x|0, y|0, entry.width(), entry.height()|0);
-      entry.element.style.left = Math.floor(x) + 'px';
-      entry.element.style.top = Math.floor(y) + 'px';
-      entry.element.style.width = Math.min(options.rowWidth, Math.ceil(entry.width())) + 'px';
-      entry.element.style.height = Math.ceil(entry.height()) + 'px';
-      entry.element.style.position = 'absolute';
-      x += entry.width();
+      log(' - entry at %s,%s %sx%s', x|0, y|0, entry.width(), entry.height()|0);
+      var w = entry.width();
+      var h = entry.height();
+      var e = {
+        x: Math.floor(x),
+        y: Math.floor(y),
+        w: Math.min(options.rowWidth, Math.ceil(w)),
+        h: Math.ceil(h),
+        element: entry.element
+      };
+      if (options.render) {
+        options.render(e);
+      } else {
+        elements.push(e);
+      }
+      x += w;
     });
-    console.log(' - row at %sx%s', row.width()|0, row.height|0);
+    log(' - row at %sx%s', row.width()|0, row.height|0);
     x = 0;
     y += row.height;
   });
+
+  return {
+    // grid properties
+    width: options.rowWidth,
+    height: y,
+    elements: elements
+  };
 }
 
 function makeRow(rows, initialEntries, initialHeight) {
@@ -135,17 +160,31 @@ function makeRow(rows, initialEntries, initialHeight) {
     }
   };
   rows.push(row);
-  console.log('makeRow()');
   return row;
 }
 
 function aspectRatio(element) {
-  var r = parseFloat(element.dataset.aspectRatio, 10) || 0;
+  var r = parseFloat(getAxis(element, 'aspectRatio'), 10) || 0;
   if (r) {
     return r;
   } else {
-    var w = parseFloat(element.dataset.width || element.naturalWidth || element.getAttribute('width') || element.width, 10) || 1;
-    var h = parseFloat(element.dataset.height || element.naturalHeight || element.getAttribute('height') || element.height, 10) || 1;
+    var w = parseFloat(getAxis(element, 'width'), 10) || 1;
+    var h = parseFloat(getAxis(element, 'height'), 10) || 1;
+    console.log('aspectRatio: w:%s h:%s', w, h);
     return w / h;
   }
+}
+
+var AxisMap = {width: 'naturalWidth', height: 'naturalHeight'};
+
+function getAxis(element, axis) {
+  var Axis = AxisMap[axis];
+  if (element.dataset && element.dataset[axis]) {
+    return element.dataset[axis];
+  } else if (element[Axis]) {
+    return element[Axis];
+  } else if (element.getAttribute && element.getAttribute(axis)) {
+    return element.getAttribute(axis);
+  }
+  return element[axis];
 }
