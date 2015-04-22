@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset='utf8'>
+  <title>Justified Grid</title>
+</head>
+<body>
+  <p>Please check the logs for this non-DOM example.</p>
+  <script src='./justified-grid.min.js'></script>
+  <script>
+
+    var grid = justifyGrid([
+      {id: 1, width: 100, height: 80},
+      {id: 2, width: 80, height: 100},
+      {id: 3, width: 80, height: 120},
+      {id: 4, width: 120, height: 300},
+    ]);
+
+    console.log('result: ', grid);
+  </script>
+</body>
+</html>
