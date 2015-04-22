@@ -21,3 +21,16 @@ grid.elements.forEach(function(entry) {
   // entry: {x: <x>, y: <y>, w: <width>, h: <height>, element: {...}};
 });
 ```
+
+## CDN
+
+To use this lib standalone without compiling you can use [wzrd.in](https://wzrd.in/).
+
+And thus simply:
+
+```
+<script src='https://wzrd.in/standalone/justified-grid@1.0'></script>
+<script>
+var grid = justifiedGrid([elements...]);
+</script>
+```
