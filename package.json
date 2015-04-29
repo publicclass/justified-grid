@@ -1,6 +1,6 @@
 {
   "name": "justified-grid",
-  "version": "1.0.0-rc2.0",
+  "version": "1.0.0-rc3.0",
   "description": "Justify elements to fit a certain width. Just like Flickr and Google does.",
   "main": "index.js",
   "scripts": {
