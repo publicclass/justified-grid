@@ -9,7 +9,7 @@
     padding: 0;
   }
   #gallery {
-    top: 120px;
+    top: 138px;
     position: relative;
     border: 1px solid red;
   }
@@ -19,6 +19,7 @@
   #gallery article{
     padding: 20px;
     box-sizing: border-box;
+    overflow: hidden;
   }
   #gallery img {
     width: 100%;
@@ -216,6 +217,7 @@
           entry.element.style.top = entry.y + 'px';
           entry.element.style.width = entry.w + 'px';
           entry.element.style.height = entry.h + 'px';
+          entry.element.style.padding = entry.p + 'px';
           entry.element.style.position = 'absolute';
         }
       });
