@@ -5,8 +5,9 @@ function justify(elements, options) {
   // build the options
   options = options || {};
   options.debug = !!options.debug;
+  options.padding = Math.round(options.padding*2 || 0);
   options.rowWidth = Math.round(Math.max(1, options.rowWidth || 800));
-  options.rowHeight = Math.round(Math.max(1, options.rowHeight || 100));
+  options.rowHeight = Math.round(Math.max(1, options.rowHeight || 100)) - options.padding;
   options.heightThreshold = Math.min(1, Math.max(0, options.heightThreshold || 0.25)); // 25%
   options.orphanThreshold = Math.min(1, Math.max(0, options.orphanThreshold || 0.25)); // 25%
   options.render = typeof options.render == 'function' ? options.render : false;
@@ -19,11 +20,11 @@ function justify(elements, options) {
       element: elements[i],
       aspectRatio: aspectRatio(elements[i]),
       height: function() {
-        log('entry.height(%s || %s)', this.row && this.row.height, options.rowHeight);
+        // log('entry.height(%s || %s)', this.row && this.row.height, options.rowHeight);
         return this.row && this.row.height || options.rowHeight;
       },
       width: function() {
-        log('entry.width(h: %s, r: %s)', this.height(), this.aspectRatio);
+        // log('entry.width(h: %s, r: %s)', this.height(), this.aspectRatio);
         return this.height() * this.aspectRatio;
       }
     });
@@ -45,14 +46,15 @@ function justify(elements, options) {
 
     log(' - %s,%s %sx%s', rows.length, row.entries.length, entry.width(), entry.height());
 
+    //If padding exists make remove it from the content sizes.
+    var totalRowPadding = options.padding > 0 ? (row.entries.length)*(options.padding) : 0;
     // when overflowing make sure the row fits
-    if (contentWidth >= options.rowWidth) {
+    if (contentWidth >= options.rowWidth-totalRowPadding) {
       var removedEntries = [];
 
       log(' - overflowing: %s / %s', contentWidth, options.rowWidth);
-
-      contentHeight = options.rowHeight / contentWidth * options.rowWidth;
-      contentWidth = options.rowWidth;
+      contentHeight = options.rowHeight / (contentWidth) * (options.rowWidth-totalRowPadding);
+      contentWidth = options.rowWidth - totalRowPadding;
       log(' - row: %sx%s', contentWidth, contentHeight);
 
       // if it's not within the threshold try with one less entry
@@ -61,7 +63,7 @@ function justify(elements, options) {
         var preDiff = Math.abs(options.rowHeight - contentHeight);
         var removedEntry = row.entries.pop();
         contentWidth = row.width();
-        contentHeight = options.rowHeight / contentWidth * options.rowWidth;
+        contentHeight = options.rowHeight / contentWidth * (options.rowWidth-totalRowPadding);
         row.height = contentHeight;
         contentWidth = row.width();
         var postDiff = Math.abs(options.rowHeight - contentHeight);
@@ -120,8 +122,8 @@ function justify(elements, options) {
   rows.forEach(function renderRow(row) {
     row.entries.forEach(function renderEntry(entry) {
       log(' - entry at %s,%s %sx%s', x|0, y|0, entry.width(), entry.height()|0);
-      var w = entry.width();
-      var h = entry.height();
+      var w = entry.width() + (options.padding);
+      var h = entry.height() + (options.padding);
       var e = {
         x: Math.floor(x),
         y: Math.floor(y),
@@ -138,7 +140,7 @@ function justify(elements, options) {
     });
     log(' - row at %sx%s', row.width()|0, row.height|0);
     x = 0;
-    y += row.height;
+    y += row.height + (options.padding);
   });
 
   return {
