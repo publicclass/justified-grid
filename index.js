@@ -39,6 +39,7 @@ function justify(elements, options) {
   var row = makeRow(rows, null, options.rowHeight);
   var contentWidth = 0;
   var contentHeight = options.rowHeight;
+  var totalRowPadding;
   entries.forEach(function buildRows(entry) {
     contentWidth += entry.width();
     entry.row = row;
@@ -47,7 +48,7 @@ function justify(elements, options) {
     log(' - %s,%s %sx%s', rows.length, row.entries.length, entry.width(), entry.height());
 
     //If padding exists make remove it from the content sizes.
-    var totalRowPadding = (options.padding > 0) ? (row.entries.length)*(options.padding) : 0;
+    totalRowPadding = (options.padding > 0) ? (row.entries.length)*(options.padding) : 0;
     // when overflowing make sure the row fits
     if (contentWidth >= options.rowWidth-totalRowPadding) {
       var removedEntries = [];
@@ -104,17 +105,23 @@ function justify(elements, options) {
   // deal with the last row, if there are entries in it
   if (row.entries.length) {
     row.height = contentHeight;
+    totalRowPadding = (options.padding > 0) ? (row.entries.length)*(options.padding) : 0;
 
     // justify the last row if it's width is within a threshold
     var diffWidth = Math.abs(options.rowWidth - contentWidth);
     log('last row. should we justify?', diffWidth, options.rowWidth*options.orphanThreshold);
-    if (diffWidth <= options.rowWidth*options.orphanThreshold) {
-      log('justify last row. %s > %s', diffWidth, options.rowWidth*options.orphanThreshold, contentWidth);
-      contentHeight = options.rowHeight / row.width() * options.rowWidth;
+    if (diffWidth <= (options.rowWidth-totalRowPadding)*options.orphanThreshold) {
+      log('justify last row. %s > %s', diffWidth, (options.rowWidth-totalRowPadding)*options.orphanThreshold, contentWidth);
+      contentHeight = options.rowHeight / row.width() * (options.rowWidth-totalRowPadding);
       row.height = contentHeight;
       log(' - updated row: %sx%s', row.width(), contentHeight);
     }
   }
+
+  if(row.entries.length === 0){
+    rows.pop();
+  }
+
 
   // update the elements
   log('render elements:')
