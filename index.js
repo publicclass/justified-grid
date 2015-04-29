@@ -47,7 +47,7 @@ function justify(elements, options) {
     log(' - %s,%s %sx%s', rows.length, row.entries.length, entry.width(), entry.height());
 
     //If padding exists make remove it from the content sizes.
-    var totalRowPadding = options.padding > 0 ? (row.entries.length)*(options.padding) : 0;
+    var totalRowPadding = (options.padding > 0) ? (row.entries.length)*(options.padding) : 0;
     // when overflowing make sure the row fits
     if (contentWidth >= options.rowWidth-totalRowPadding) {
       var removedEntries = [];
@@ -62,6 +62,8 @@ function justify(elements, options) {
         log(' - over threshold. pop and resize.');
         var preDiff = Math.abs(options.rowHeight - contentHeight);
         var removedEntry = row.entries.pop();
+        //update totalRowPadding since we've popped an entry from the array
+        totalRowPadding = (options.padding > 0) ? (row.entries.length)*(options.padding) : 0;
         contentWidth = row.width();
         contentHeight = options.rowHeight / contentWidth * (options.rowWidth-totalRowPadding);
         row.height = contentHeight;
@@ -129,6 +131,7 @@ function justify(elements, options) {
         y: Math.floor(y),
         w: Math.min(options.rowWidth, Math.ceil(w)),
         h: Math.ceil(h),
+        p: options.padding/2,
         element: entry.element
       };
       if (options.render) {
