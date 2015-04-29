@@ -31,7 +31,7 @@
     background: white;
     padding: 10px;
     width: 100%;
-    height: 100px;
+    height: 120px;
   }
   label {
     box-sizing: border-box;
@@ -51,7 +51,7 @@
       <input name='width' value='800' min='100' max='2000' step='10' type='range' onmousemove='redraw()'>
     </label>
     <label>
-      <span>Height (<span id='h'></span>px)</span>
+      <span>Row Height (<span id='h'></span>px)</span>
       <input name='height' value='200' min='10' max='400' step='1' type='range' onmousemove='redraw()'>
     </label>
     <label title='How much of the last row can be whitespace before it is justified. 100% means always justify the last row. 0% means never justify the last row.'>
@@ -61,6 +61,10 @@
     <label title='How flexible each row height is in % of the target row height.'>
       <span>Height Threshold (<span id='t'></span>%)</span>
       <input name='vthreshold' value='0.25' min='0' max='1' step='0.01' type='range' onmousemove='redraw()'>
+    </label>
+    <label>
+      <span>Padding (<span id='p'></span>px)</span>
+      <input name='padding' value='5' min='0' max='50' step='1' type='range' onmousemove='redraw()'>
     </label>
   </form>
 
@@ -205,7 +209,7 @@
         rowWidth: Math.min(form.width.valueAsNumber, gallery.clientWidth),
         orphanThreshold: form.hthreshold.valueAsNumber,
         heightThreshold: form.vthreshold.valueAsNumber,
-        padding: 20,
+        padding: form.padding.valueAsNumber,
         debug: true,
         render: function(entry) {
           entry.element.style.left = entry.x + 'px';
@@ -222,6 +226,7 @@
       h.innerHTML = form.height.valueAsNumber;
       o.innerHTML = form.hthreshold.valueAsNumber * 100 | 0;
       t.innerHTML = form.vthreshold.valueAsNumber * 100 | 0;
+      p.innerHTML = form.padding.valueAsNumber | 0;
     }
 
     window.addEventListener('resize', redraw);
